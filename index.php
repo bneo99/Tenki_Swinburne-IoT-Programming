@@ -1,40 +1,3 @@
-<?php
-
-
-require "db-conn.php";
-
-// queries
-$query_current = "select * from sensor_data order by id desc limit 1";
-$query_latest1k = "select * from sensor_data order by id desc limit 1000";
-
-//$stmt->bind_param("sss", $firstname, $lastname, $email);
-
-//get current sensor data
-$result = $conn->query($query_current);
-
-if ($result->num_rows > 0) {
-  // one row only
-  while($row = $result->fetch_assoc()) {
-    $sensor_current = array(
-      "temperature" => $row["temperature"],
-      "humidity" => $row["humidity"],
-      "pressure" => $row["pressure"],
-      "rain" => $row["rain"]
-    );
-  }
-} else {
-  $sensor_current = array(
-  "temperature" => "-",
-  "humidity" => "-",
-  "pressure" => "-",
-  "rain" => "0"
-  );
-}
-
-$conn->close();
-
-?>
-
 <!DOCTYPE html>
 <!--
 Tenki dashboard, built with adminlte starter page
@@ -63,10 +26,7 @@ Tenki dashboard, built with adminlte starter page
         <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
       </li>
       <li class="nav-item d-none d-sm-inline-block">
-        <a href="index3.html" class="nav-link">Home</a>
-      </li>
-      <li class="nav-item d-none d-sm-inline-block">
-        <a href="#" class="nav-link">Contact</a>
+        <a href="#" onclick="getSensorData()" class="nav-link">Refresh Sensor Data</a>
       </li>
     </ul>
   </nav>
@@ -75,8 +35,8 @@ Tenki dashboard, built with adminlte starter page
   <!-- Main Sidebar Container -->
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="index3.html" class="brand-link">
-      <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+    <a href="" class="brand-link">
+      <i class="ml-2 mr-1 fas fa-umbrella"></i>
       <span class="brand-text font-weight-light">Tenki</span>
     </a>
 
@@ -143,7 +103,7 @@ Tenki dashboard, built with adminlte starter page
               <div class="info-box-content">
                 <span class="info-box-text">Temperature</span>
                 <span class="info-box-number">
-                  <?php echo round($sensor_current["temperature"], 2); ?>
+                  <span id="curr_temperature">-</span>
                   <small>°C</small>
                 </span>
               </div>
@@ -159,7 +119,7 @@ Tenki dashboard, built with adminlte starter page
               <div class="info-box-content">
                 <span class="info-box-text">Relative Humidity</span>
                 <span class="info-box-number">
-                  <?php echo round($sensor_current["humidity"], 2); ?>
+                  <span id="curr_humidity">-</span>
                   <small>%</small>
                 </span>
               </div>
@@ -179,7 +139,7 @@ Tenki dashboard, built with adminlte starter page
               <div class="info-box-content">
                 <span class="info-box-text">Rain</span>
                 <span class="info-box-number">
-                <?php echo $sensor_current["rain"]; ?>
+                <span id="curr_rain">-</span>
                 </span>
               </div>
               <!-- /.info-box-content -->
@@ -194,7 +154,7 @@ Tenki dashboard, built with adminlte starter page
               <div class="info-box-content">
                 <span class="info-box-text">Barometric Pressure</span>
                 <span class="info-box-number">
-                  <?php echo round($sensor_current["pressure"]/1000, 2); ?>
+                  <span id="curr_pressure">-</span>
                   <small>kPa</small>
                 </span>
               </div>
@@ -208,65 +168,105 @@ Tenki dashboard, built with adminlte starter page
       
         <div class="row">
           <div class="col-lg-6">
-            <div class="card card-info">
+            <!-- Temp chart -->
+            <div class="card card-primary card-outline">
               <div class="card-header">
-                <h3 class="card-title">Line Chart</h3>
+                <h3 class="card-title">
+                  <i class="far fa-chart-bar"></i>
+                  Temperature History (past 5 hours)
+                </h3>
 
                 <div class="card-tools">
                   <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
                   </button>
-                  <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>
+                  <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i>
+                  </button>
                 </div>
               </div>
               <div class="card-body">
-                <div class="chart">
-                  <canvas id="lineChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                </div>
+                <div id="temperature-chart" style="height: 300px;"></div>
               </div>
-              <!-- /.card-body -->
+              <!-- /.card-body-->
             </div>
             <!-- /.card -->
-
-            <div class="card card-primary card-outline">
-              <div class="card-body">
-                <h5 class="card-title">Card title</h5>
-
-                <p class="card-text">
-                  Some quick example text to build on the card title and make up the bulk of the card's
-                  content.
-                </p>
-                <a href="#" class="card-link">Card link</a>
-                <a href="#" class="card-link">Another link</a>
-              </div>
-            </div><!-- /.card -->
           </div>
-          <!-- /.col-md-6 -->
+          <!-- /.col-lg-6 -->
           <div class="col-lg-6">
-            <div class="card">
-              <div class="card-header">
-                <h5 class="m-0">Featured</h5>
-              </div>
-              <div class="card-body">
-                <h6 class="card-title">Special title treatment</h6>
-
-                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                <a href="#" class="btn btn-primary">Go somewhere</a>
-              </div>
-            </div>
-
+            <!-- Humidity chart -->
             <div class="card card-primary card-outline">
               <div class="card-header">
-                <h5 class="m-0">Featured</h5>
+                <h3 class="card-title">
+                  <i class="far fa-chart-bar"></i>
+                  Humidity History (past 5 hours)
+                </h3>
+
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+                  </button>
+                  <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i>
+                  </button>
+                </div>
               </div>
               <div class="card-body">
-                <h6 class="card-title">Special title treatment</h6>
-
-                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                <a href="#" class="btn btn-primary">Go somewhere</a>
+                <div id="humidity-chart" style="height: 300px;"></div>
               </div>
+              <!-- /.card-body-->
             </div>
+            <!-- /.card -->
           </div>
-          <!-- /.col-md-6 -->
+          <!-- /.col-lg-6 -->
+        </div>
+        <!-- /.row -->
+        
+        <div class="row">
+          <div class="col-lg-6">
+            <!-- Temp chart -->
+            <div class="card card-primary card-outline">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="far fa-chart-bar"></i>
+                  Rain History (past 5 hours)
+                </h3>
+
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+                  </button>
+                  <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div id="rain-chart" style="height: 300px;"></div>
+              </div>
+              <!-- /.card-body-->
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col-lg-6 -->
+          <div class="col-lg-6">
+            <!-- Humidity chart -->
+            <div class="card card-primary card-outline">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="far fa-chart-bar"></i>
+                  Barometric Pressure History (past 5 hours)
+                </h3>
+
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+                  </button>
+                  <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div id="pressure-chart" style="height: 300px;"></div>
+              </div>
+              <!-- /.card-body-->
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col-lg-6 -->
         </div>
         <!-- /.row -->
       </div><!-- /.container-fluid -->
@@ -303,78 +303,328 @@ Tenki dashboard, built with adminlte starter page
 <script src="plugins/jquery/jquery.min.js"></script>
 <!-- Bootstrap 4 -->
 <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-<!-- ChartJS -->
-<script src="../../plugins/chart.js/Chart.min.js"></script>
 <!-- AdminLTE App -->
 <script src="dist/js/adminlte.min.js"></script>
+<!-- FLOT CHARTS -->
+<script src="../../plugins/flot/jquery.flot.js"></script>
+<script src="../../plugins/flot-old/jquery.flot.time.js"></script>
+<!-- FLOT RESIZE PLUGIN - allows the chart to redraw when the window is resized -->
+<script src="../../plugins/flot-old/jquery.flot.resize.min.js"></script>
 
 <script>
- $(function () {
-  
-    var areaChartData = {
-      labels  : ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-      datasets: [
-        {
-          label               : 'Digital Goods',
-          backgroundColor     : 'rgba(60,141,188,0.9)',
-          borderColor         : 'rgba(60,141,188,0.8)',
-          pointRadius          : false,
-          pointColor          : '#3b8bba',
-          pointStrokeColor    : 'rgba(60,141,188,1)',
-          pointHighlightFill  : '#fff',
-          pointHighlightStroke: 'rgba(60,141,188,1)',
-          data                : [28, 48, 40, 19, 86, 27, 90]
-        },
-        {
-          label               : 'Electronics',
-          backgroundColor     : 'rgba(210, 214, 222, 1)',
-          borderColor         : 'rgba(210, 214, 222, 1)',
-          pointRadius         : false,
-          pointColor          : 'rgba(210, 214, 222, 1)',
-          pointStrokeColor    : '#c1c7d1',
-          pointHighlightFill  : '#fff',
-          pointHighlightStroke: 'rgba(220,220,220,1)',
-          data                : [65, 59, 80, 81, 56, 55, 40]
-        },
-      ]
-    }
-  
-    var areaChartOptions = {
-      maintainAspectRatio : false,
-      responsive : true,
-      legend: {
-        display: false
-      },
-      scales: {
-        xAxes: [{
-          gridLines : {
-            display : false,
-          }
-        }],
-        yAxes: [{
-          gridLines : {
-            display : false,
-          }
-        }]
-      }
-    }
-  
-    //-------------
-    //- LINE CHART -
-    //--------------
-    var lineChartCanvas = $('#lineChart').get(0).getContext('2d')
-    var lineChartOptions = $.extend(true, {}, areaChartOptions)
-    var lineChartData = $.extend(true, {}, areaChartData)
-    lineChartData.datasets[0].fill = false;
-    lineChartData.datasets[1].fill = false;
-    lineChartOptions.datasetFill = false
 
-    var lineChart = new Chart(lineChartCanvas, {
-      type: 'line',
-      data: lineChartData,
-      options: lineChartOptions
-    })
+
+var sensorHistoryArray = [];
+
+//fetch sensor data from server
+function getSensorData(count = 1800) {
+  $.getJSON( "fetch_sensor.php", { count: count } )
+  .done(function( data ) {
   
+  //shove the data into the main array, so other functions can use it
+  //we're changing the format while we're at it, so more useable
+    sensorHistoryArray = data.map(item => {
+      var newObj = new Object();
+      newObj.datetime = new Date(item.datetime+"Z"); //adding a Z to indicate this is a UTC time 
+      newObj.temperature = item.temperature.toFixed(2);
+      newObj.humidity = item.humidity.toFixed(2);
+      newObj.rain = item.rain;
+      newObj.pressure = (item.pressure/1000).toFixed(2);
+      return newObj;
+    });
+    
+    //update sensor data when result is back
+    updateCurrentSensor();
+    loadCharts();
+  })
+}
+
+//display first(latest) sensor data
+function updateCurrentSensor() {
+//rounding them to 2dp and pressure convert to kPa
+  $('#curr_temperature').html(sensorHistoryArray[0].temperature);
+  $('#curr_humidity').html(sensorHistoryArray[0].humidity);
+  $('#curr_pressure').html(sensorHistoryArray[0].pressure);
+  $('#curr_rain').html(sensorHistoryArray[0].rain);
+}
+
+function loadCharts(){
+  loadTempChart();
+  loadHumidityChart();
+  loadRainChart();
+  loadPressureChart();
+}
+
+function loadTempChart(){
+
+  var tempArr = sensorHistoryArray.map(item => [item.datetime, item.temperature]);
+
+  var temp_data = {
+    data : tempArr,
+    color: '#3c8dbc'
+  }
+
+  $.plot('#temperature-chart', [temp_data], {
+    grid  : {
+      hoverable  : true,
+      borderColor: '#f3f3f3',
+      borderWidth: 1,
+      tickColor  : '#f3f3f3'
+    },
+    series: {
+      shadowSize: 0,
+      lines     : {
+        show: true
+      },
+      points: {
+        show: false
+      }
+    },
+    lines : {
+      fill : false,
+      color: ['#3c8dbc']
+    },
+    yaxis : {
+      show: true
+    },
+    xaxis : {
+      show: true,
+      mode: "time",
+      timeformat: "%H:%M", // 24hr format
+      tickSize: [1, "hour"], // tick every hour
+      timezone: "browser"
+    }
+  })
+  
+  //Initialize tooltip on hover
+  $('<div class="tooltip-inner" id="temp-chart-tooltip"></div>').css({
+    position: 'absolute',
+    display : 'none',
+    opacity : 0.8
+  }).appendTo('body')
+  $('#temperature-chart').bind('plothover', function (event, pos, item) {
+
+    if (item) {
+      var x = new Date(item.datapoint[0]).toString(),
+          y = item.datapoint[1].toFixed(2)
+
+      $('#temp-chart-tooltip').html(x + '<br/>Temperature = ' + y + '°C')
+        .css({
+          top : item.pageY + 5,
+          left: item.pageX + 5
+        })
+        .fadeIn(200)
+    } else {
+      $('#temp-chart-tooltip').hide()
+    }
+
+  })
+}
+
+function loadHumidityChart(){
+
+  var humiArr = sensorHistoryArray.map(item => [item.datetime, item.humidity]);
+
+  var humi_data = {
+    data : humiArr,
+    color: '#3c8dbc'
+  }
+
+  $.plot('#humidity-chart', [humi_data], {
+    grid  : {
+      hoverable  : true,
+      borderColor: '#f3f3f3',
+      borderWidth: 1,
+      tickColor  : '#f3f3f3'
+    },
+    series: {
+      shadowSize: 0,
+      lines     : {
+        show: true
+      },
+      points: {
+        show: false
+      }
+    },
+    lines : {
+      fill : false,
+      color: ['#3c8dbc']
+    },
+    yaxis : {
+      show: true
+    },
+    xaxis : {
+      show: true,
+      mode: "time",
+      timeformat: "%H:%M", // 24hr format
+      tickSize: [1, "hour"], // tick every hour
+      timezone: "browser"
+    }
+  })
+  
+  //Initialize tooltip on hover
+  $('<div class="tooltip-inner" id="humi-chart-tooltip"></div>').css({
+    position: 'absolute',
+    display : 'none',
+    opacity : 0.8
+  }).appendTo('body')
+  $('#humidity-chart').bind('plothover', function (event, pos, item) {
+
+    if (item) {
+      var x = new Date(item.datapoint[0]).toString(),
+          y = item.datapoint[1].toFixed(2)
+
+      $('#humi-chart-tooltip').html(x + '<br/>Humidity = ' + y + '%')
+        .css({
+          top : item.pageY + 5,
+          left: item.pageX + 5
+        })
+        .fadeIn(200)
+    } else {
+      $('#humi-chart-tooltip').hide()
+    }
+
+  })
+}
+
+function loadRainChart(){
+
+  var rainArr = sensorHistoryArray.map(item => [item.datetime, item.rain]);
+
+  var rain_data = {
+    data : rainArr,
+    color: '#3c8dbc'
+  }
+
+  $.plot('#rain-chart', [rain_data], {
+    grid  : {
+      hoverable  : true,
+      borderColor: '#f3f3f3',
+      borderWidth: 1,
+      tickColor  : '#f3f3f3'
+    },
+    series: {
+      shadowSize: 0,
+      lines     : {
+        show: true
+      },
+      points: {
+        show: false
+      }
+    },
+    lines : {
+      fill : false,
+      color: ['#3c8dbc']
+    },
+    yaxis : {
+      show: true
+    },
+    xaxis : {
+      show: true,
+      mode: "time",
+      timeformat: "%H:%M", // 24hr format
+      tickSize: [1, "hour"], // tick every hour
+      timezone: "browser"
+    }
+  })
+  
+  //Initialize tooltip on hover
+  $('<div class="tooltip-inner" id="rain-chart-tooltip"></div>').css({
+    position: 'absolute',
+    display : 'none',
+    opacity : 0.8
+  }).appendTo('body')
+  $('#rain-chart').bind('plothover', function (event, pos, item) {
+
+    if (item) {
+      var x = new Date(item.datapoint[0]).toString(),
+          y = item.datapoint[1]
+
+      $('#rain-chart-tooltip').html(x + '<br/>Rain = ' + y)
+        .css({
+          top : item.pageY + 5,
+          left: item.pageX + 5
+        })
+        .fadeIn(200)
+    } else {
+      $('#rain-chart-tooltip').hide()
+    }
+
+  })
+}
+
+function loadPressureChart(){
+
+  var presArr = sensorHistoryArray.map(item => [item.datetime, item.pressure]);
+
+  var pres_data = {
+    data : presArr,
+    color: '#3c8dbc'
+  }
+
+  $.plot('#pressure-chart', [pres_data], {
+    grid  : {
+      hoverable  : true,
+      borderColor: '#f3f3f3',
+      borderWidth: 1,
+      tickColor  : '#f3f3f3'
+    },
+    series: {
+      shadowSize: 0,
+      lines     : {
+        show: true
+      },
+      points: {
+        show: false
+      }
+    },
+    lines : {
+      fill : false,
+      color: ['#3c8dbc']
+    },
+    yaxis : {
+      show: true
+    },
+    xaxis : {
+      show: true,
+      mode: "time",
+      timeformat: "%H:%M", // 24hr format
+      tickSize: [1, "hour"], // tick every hour
+      timezone: "browser"
+    }
+  })
+  
+  //Initialize tooltip on hover
+  $('<div class="tooltip-inner" id="pres-chart-tooltip"></div>').css({
+    position: 'absolute',
+    display : 'none',
+    opacity : 0.8
+  }).appendTo('body')
+  $('#pressure-chart').bind('plothover', function (event, pos, item) {
+
+    if (item) {
+      var x = new Date(item.datapoint[0]).toString(),
+          y = item.datapoint[1].toFixed(2)
+
+      $('#pres-chart-tooltip').html(x + '<br/>Pressure = ' + y + 'kPa')
+        .css({
+          top : item.pageY + 5,
+          left: item.pageX + 5
+        })
+        .fadeIn(200)
+    } else {
+      $('#pres-chart-tooltip').hide()
+    }
+
+  })
+}
+
+// this runs when page is ready
+$(function () {
+  
+    //run stuff when page loads
+    getSensorData();
+
   })
 
 </script>
