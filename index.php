@@ -49,7 +49,7 @@ Tenki dashboard, built with adminlte starter page
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
           <li class="nav-item">
-            <a href="#" class="nav-link active">
+            <a href="/" class="nav-link active">
               <i class="nav-icon fas fa-tachometer-alt"></i>
               <p>
                 Dashboard
@@ -58,10 +58,10 @@ Tenki dashboard, built with adminlte starter page
            
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-th"></i>
+            <a href="schedule.php" class="nav-link">
+              <i class="nav-icon fas fa-calendar"></i>
               <p>
-                Simple Link
+                Manage Schedules
               </p>
             </a>
           </li>
@@ -79,7 +79,7 @@ Tenki dashboard, built with adminlte starter page
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1 class="m-0 text-dark">Dashboard</h1>
+            <h1 class="m-0 text-dark">Schedule</h1>
           </div><!-- /.col -->
         </div><!-- /.row -->
       </div><!-- /.container-fluid -->
@@ -179,8 +179,6 @@ Tenki dashboard, built with adminlte starter page
                 <div class="card-tools">
                   <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
                   </button>
-                  <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i>
-                  </button>
                 </div>
               </div>
               <div class="card-body">
@@ -203,8 +201,6 @@ Tenki dashboard, built with adminlte starter page
                 <div class="card-tools">
                   <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
                   </button>
-                  <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i>
-                  </button>
                 </div>
               </div>
               <div class="card-body">
@@ -220,7 +216,7 @@ Tenki dashboard, built with adminlte starter page
         
         <div class="row">
           <div class="col-lg-6">
-            <!-- Temp chart -->
+            <!-- Rain chart -->
             <div class="card card-primary card-outline">
               <div class="card-header">
                 <h3 class="card-title">
@@ -230,8 +226,6 @@ Tenki dashboard, built with adminlte starter page
 
                 <div class="card-tools">
                   <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
-                  </button>
-                  <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i>
                   </button>
                 </div>
               </div>
@@ -244,7 +238,7 @@ Tenki dashboard, built with adminlte starter page
           </div>
           <!-- /.col-lg-6 -->
           <div class="col-lg-6">
-            <!-- Humidity chart -->
+            <!-- Pressure chart -->
             <div class="card card-primary card-outline">
               <div class="card-header">
                 <h3 class="card-title">
@@ -254,8 +248,6 @@ Tenki dashboard, built with adminlte starter page
 
                 <div class="card-tools">
                   <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
-                  </button>
-                  <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i>
                   </button>
                 </div>
               </div>
