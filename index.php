@@ -26,7 +26,24 @@ Tenki dashboard, built with adminlte starter page
         <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
       </li>
       <li class="nav-item d-none d-sm-inline-block">
-        <a href="#" onclick="getSensorData()" class="nav-link">Refresh Sensor Data</a>
+        <a href="#" onclick="getSensorData(historyRange);" class="nav-link">Refresh Sensor Data</a>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Sensor Refresh Rate: <span id="polling_rate">-</span> minute(s)</a>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" href="#" onclick="setPollingRate(1)">1 Minute</a>
+          <a class="dropdown-item" href="#" onclick="setPollingRate(5)">5 Minute</a>
+          <a class="dropdown-item" href="#" onclick="setPollingRate(10)">10 Minutes</a>
+        </div>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">History Range: <span id="history_range">-</span> hour(s)</a>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" href="#" onclick="setHistoryRange(1)">1 Hour</a>
+          <a class="dropdown-item" href="#" onclick="setHistoryRange(6)">6 Hours</a>
+          <a class="dropdown-item" href="#" onclick="setHistoryRange(24)">24 Hours</a>
+          <a class="dropdown-item" href="#" onclick="setHistoryRange(48)">48 Hours</a>
+        </div>
       </li>
     </ul>
   </nav>
@@ -91,7 +108,8 @@ Tenki dashboard, built with adminlte starter page
       <div class="container-fluid">
       <div class="row mb-2">
           <div class="col-sm-6">
-            <h5 class="m-0 text-dark">Current Sensor Data</h5>
+            <span class="h5 m-0 text-dark">Current Sensor Data</span>
+            <small>as of <span id="curr_sensor_timestamp" class="font-weight-bold">-</span></small>
           </div><!-- /.col -->
         </div><!-- /.row -->
         <!-- Info boxes -->
@@ -173,7 +191,7 @@ Tenki dashboard, built with adminlte starter page
               <div class="card-header">
                 <h3 class="card-title">
                   <i class="far fa-chart-bar"></i>
-                  Temperature History (past 5 hours)
+                  Temperature History
                 </h3>
 
                 <div class="card-tools">
@@ -195,7 +213,7 @@ Tenki dashboard, built with adminlte starter page
               <div class="card-header">
                 <h3 class="card-title">
                   <i class="far fa-chart-bar"></i>
-                  Humidity History (past 5 hours)
+                  Humidity History
                 </h3>
 
                 <div class="card-tools">
@@ -221,7 +239,7 @@ Tenki dashboard, built with adminlte starter page
               <div class="card-header">
                 <h3 class="card-title">
                   <i class="far fa-chart-bar"></i>
-                  Rain History (past 5 hours)
+                  Rain History
                 </h3>
 
                 <div class="card-tools">
@@ -243,7 +261,7 @@ Tenki dashboard, built with adminlte starter page
               <div class="card-header">
                 <h3 class="card-title">
                   <i class="far fa-chart-bar"></i>
-                  Barometric Pressure History (past 5 hours)
+                  Barometric Pressure History
                 </h3>
 
                 <div class="card-tools">
@@ -308,8 +326,47 @@ Tenki dashboard, built with adminlte starter page
 
 var sensorHistoryArray = [];
 
+var pollingRate;
+
+//needed to cancel the timeout when we update polling rate
+var pollTimeoutID;
+
+var historyRange;
+
+function setPollingRate(minute = 5){
+  pollingRate = minute;
+  $('#polling_rate').html(pollingRate);
+  
+  //remove previous poll if exists
+  if (pollTimeoutID){
+    clearTimeout(pollTimeoutID);
+  }
+  
+  // start the poll
+  pollTimeoutID = setTimeout(handlePolling, pollingRate * 60 * 1000);
+}
+
+function handlePolling() {
+  //queue the next poll
+  pollTimeoutID = setTimeout(handlePolling, pollingRate * 60 * 1000);
+    
+  //get the sensor data
+  getSensorData(historyRange);
+}
+
+function setHistoryRange(hour = 6){
+  historyRange = hour;
+  $('#history_range').html(historyRange);
+  
+  getSensorData(historyRange);
+}
+
 //fetch sensor data from server
-function getSensorData(count = 1800) {
+function getSensorData(range = 6) {
+
+  //set the count based on the history range
+  count = range * 360;
+  
   $.getJSON( "fetch_sensor.php", { count: count } )
   .done(function( data ) {
   
@@ -334,6 +391,7 @@ function getSensorData(count = 1800) {
 //display first(latest) sensor data
 function updateCurrentSensor() {
 //rounding them to 2dp and pressure convert to kPa
+  $('#curr_sensor_timestamp').html(sensorHistoryArray[0].datetime);
   $('#curr_temperature').html(sensorHistoryArray[0].temperature);
   $('#curr_humidity').html(sensorHistoryArray[0].humidity);
   $('#curr_pressure').html(sensorHistoryArray[0].pressure);
@@ -383,7 +441,7 @@ function loadTempChart(){
       show: true,
       mode: "time",
       timeformat: "%H:%M", // 24hr format
-      tickSize: [1, "hour"], // tick every hour
+      tickSize: [10, "minute"], // tick every hour
       timezone: "browser"
     }
   })
@@ -449,7 +507,7 @@ function loadHumidityChart(){
       show: true,
       mode: "time",
       timeformat: "%H:%M", // 24hr format
-      tickSize: [1, "hour"], // tick every hour
+      tickSize: [10, "minute"], // tick every hour
       timezone: "browser"
     }
   })
@@ -515,7 +573,7 @@ function loadRainChart(){
       show: true,
       mode: "time",
       timeformat: "%H:%M", // 24hr format
-      tickSize: [1, "hour"], // tick every hour
+      tickSize: [10, "minute"], // tick every hour
       timezone: "browser"
     }
   })
@@ -581,7 +639,7 @@ function loadPressureChart(){
       show: true,
       mode: "time",
       timeformat: "%H:%M", // 24hr format
-      tickSize: [1, "hour"], // tick every hour
+      tickSize: [10, "minute"], // tick every hour
       timezone: "browser"
     }
   })
@@ -614,10 +672,10 @@ function loadPressureChart(){
 // this runs when page is ready
 $(function () {
   
-    //run stuff when page loads
-    getSensorData();
-
-  })
+  //set default polling rate and history range
+  setPollingRate();
+  setHistoryRange(); //this will call get sensor data
+})
 
 </script>
 </body>
