@@ -237,46 +237,6 @@ Tenki dashboard, built with adminlte starter page
                 <!-- /.card -->
               </div>
               <!-- /.col -->  
-
-              <div class="col-md-6">
-                <!-- watering duration -->
-                <div class="row">
-                  <div class="info-box">
-                    <span class="info-box-icon bg-primary elevation-1"><i class="fas fa-tint"></i></span>
-                    <div class="info-box-content">
-                      <span class="info-box-text">Water Duration</span>
-                      <span class="info-box-number">
-                        <div class="input-group">
-                          <input type="number" id="def_duration" class="form-control"></input>
-                          <div class="input-group-append">
-                            <span class="input-group-text">minute(s)</span>
-                          </div>
-                        </div>
-                      </span>
-                    </div>
-                    <!-- /.info-box-content -->
-                  </div>
-                  <!-- /.info-box -->
-                </div>
-                <!-- /.row --> 
-                  
-                <!-- schedule revision -->
-                <div class="row">
-                  <div class="info-box">
-                    <span class="info-box-icon bg-success elevation-1"><i class="fas fa-calendar"></i></span>
-                    <div class="info-box-content">
-                      <span class="info-box-text">Schedule Revision</span>
-                      <span class="info-box-number">
-                        <span id="def_revision">-</span>
-                      </span>
-                    </div>
-                    <!-- /.info-box-content -->
-                  </div>
-                  <!-- /.info-box -->
-                </div>
-                <!-- /.row --> 
-              </div>
-              <!-- /.col -->
             </div>
             <!-- /.row -->
           </div>
@@ -502,12 +462,6 @@ function saveDefaultSchedule(){
     getSchedule();
   });
 }
-
-//update the default duration when focus is lost
-$("#def_duration").focusout(function(){
-  defaultSchedule.duration = $('#def_duration').val();
-});
-
 
 // this runs when page is ready
 $(function () {
