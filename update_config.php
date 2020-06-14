@@ -11,7 +11,7 @@ if (isset($_POST["id"]) && isset($_POST["config"])){
   require "db-conn.php";
 
   //update query
-  $query = "update config set schedule = ?, duration = ?, revision = utc_timestamp() where id = ?";
+  $query = "update config set schedule = ?, duration = ? where id = ?";
 
   $stmt = $conn->prepare($query);
   $stmt->bind_param("sii", json_encode($config["schedule"]), $config["duration"], $config_id);
