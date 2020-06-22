@@ -4,12 +4,12 @@ import pymysql
 from datetime import datetime
 
 #rds settings
-rds_host  = "tenki-db.cluster-cw42wmt5nblr.us-east-1.rds.amazonaws.com"
-name = "admin"
-password = "tenkigenki"
-db_name = "tenki"
+rds_host  = "RDS_HOST"
+name = "DB_USERNAME"
+password = "DB_PASSWORD"
+db_name = "DB_NAME"
 
-def lambda_handler(event, context): 
+def lambda_handler(event, context):
     print("Connecting to RDS...")
     try:
         conn = pymysql.connect(rds_host, user=name, passwd=password, db=db_name, connect_timeout=5)
@@ -18,7 +18,7 @@ def lambda_handler(event, context):
         print(e)
         sys.exit()
     print("Connected to RDS...")
-    
+
     #get current config from rds
     with conn.cursor(pymysql.cursors.DictCursor) as cur:
         cur.execute("select * from config where id = 2")

@@ -1,7 +1,4 @@
 <!DOCTYPE html>
-<!--
-Tenki dashboard, built with adminlte starter page
--->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -55,7 +52,7 @@ Tenki dashboard, built with adminlte starter page
                 Dashboard
               </p>
             </a>
-           
+
           </li>
           <li class="nav-item">
             <a href="schedule.php" class="nav-link active">
@@ -89,7 +86,7 @@ Tenki dashboard, built with adminlte starter page
     <!-- Main content -->
     <div class="content">
       <div class="container-fluid">
-      
+
         <!-- Current schedule -->
         <div class="row">
           <div class="col-md-12">
@@ -139,7 +136,7 @@ Tenki dashboard, built with adminlte starter page
                 </div>
                 <!-- /.card -->
               </div>
-              <!-- /.col -->  
+              <!-- /.col -->
 
               <div class="col-md-6">
                 <!-- watering duration -->
@@ -161,8 +158,8 @@ Tenki dashboard, built with adminlte starter page
                   </div>
                   <!-- /.info-box -->
                 </div>
-                <!-- /.row --> 
-                  
+                <!-- /.row -->
+
                 <!-- schedule revision -->
                 <div class="row">
                   <div class="info-box">
@@ -177,7 +174,7 @@ Tenki dashboard, built with adminlte starter page
                   </div>
                   <!-- /.info-box -->
                 </div>
-                <!-- /.row --> 
+                <!-- /.row -->
               </div>
               <!-- /.col -->
             </div>
@@ -186,7 +183,7 @@ Tenki dashboard, built with adminlte starter page
           <!-- /.col -->
         </div>
         <!-- /.row -->
-        
+
         <!-- Default schedule -->
         <div class="row">
           <div class="col-md-12">
@@ -236,7 +233,7 @@ Tenki dashboard, built with adminlte starter page
                 </div>
                 <!-- /.card -->
               </div>
-              <!-- /.col -->  
+              <!-- /.col -->
             </div>
             <!-- /.row -->
           </div>
@@ -289,13 +286,13 @@ var defaultSchedule;
 function getSchedule(){
   $.getJSON("get_config.php")
   .done(function( data ) {
-  
+
   //id 1 is default
   //id 2 is current
   data.forEach(function (item){
     //update the revision into a date object
-    item.revision = new Date(item.revision+"Z"); //adding a Z to indicate this is a UTC time 
-    
+    item.revision = new Date(item.revision+"Z"); //adding a Z to indicate this is a UTC time
+
     if (item.id == 1){
       defaultSchedule = item;
     }
@@ -303,7 +300,7 @@ function getSchedule(){
       currentSchedule = item;
     }
   });
-    
+
     //update sensor data when result is back
     showSchedules();
   })
@@ -321,15 +318,15 @@ function showCurrentSchedule(){
 
   //populate table
   currentSchedule.schedule.forEach(function (item, index){
-  //need add 8hr to get correct timezone  
+  //need add 8hr to get correct timezone
   //trash way to do this but idc
   local_hour = item.hour + 8;
-  
+
   //overflow checking
   if (local_hour > 23){
     local_hour -= 24;
   }
-  
+
     $('#curr_table').append('<tr><td></td><td>' + local_hour + '</td><td>' + item.minute + '</td><td><button class="btn bg-danger" onclick="currentScheduleRemove('+ index +')">Delete</button></td></tr>');
   })
 
@@ -341,27 +338,27 @@ function showCurrentSchedule(){
 function currentScheduleRemove(index){
   //remove the selected entry from the array
   currentSchedule.schedule.splice(index, 1);
-  
+
   //update the table
   showCurrentSchedule();
 }
 
 function currentScheduleAdd(){
   var inputTime = $('#curr_new_schedule').val().split(":");
-  
+
   var newSchedule = new Object();
-  
+
   //minus 8 hours so back to UTC time
   newSchedule.hour = inputTime[0] - 8;
   newSchedule.minute = parseInt(inputTime[1]);
-  
+
   //underflow checking
   if (newSchedule.hour < 0){
     newSchedule.hour += 24;
   }
-  
+
   currentSchedule.schedule.push(newSchedule);
-  
+
   //update the table
   showCurrentSchedule();
 
@@ -371,14 +368,14 @@ function currentScheduleAdd(){
 
 //save current schedule to database, and push it to the control node
 function saveCurrentSchedule(){
-  $.post("update_config.php", { 
+  $.post("update_config.php", {
     "id": 2,
     "config": JSON.stringify(currentSchedule)
   },
   function (data) {
       //refetch schedule once saving to db is done
     getSchedule();
-    
+
     //push changes to node
     pushCurrentScheduleToNode();
   });
@@ -403,15 +400,15 @@ function showDefaultSchedule(){
 
   //populate table
   defaultSchedule.schedule.forEach(function (item, index){
-  //need add 8hr to get correct timezone  
+  //need add 8hr to get correct timezone
   //trash way to do this but idc
   local_hour = item.hour + 8;
-  
+
   //overflow checking
   if (local_hour > 23){
     local_hour -= 24;
   }
-  
+
     $('#def_table').append('<tr><td></td><td>' + local_hour + '</td><td>' + item.minute + '</td><td><button class="btn bg-danger" onclick="defaultScheduleRemove('+ index +')">Delete</button></td></tr>');
   })
 
@@ -423,27 +420,27 @@ function showDefaultSchedule(){
 function defaultScheduleRemove(index){
   //remove the selected entry from the array
   defaultSchedule.schedule.splice(index, 1);
-  
+
   //update the table
   showDefaultSchedule();
 }
 
 function defaultScheduleAdd(){
   var inputTime = $('#def_new_schedule').val().split(":");
-  
+
   var newSchedule = new Object();
-  
+
   //minus 8 hours so back to UTC time
   newSchedule.hour = inputTime[0] - 8;
   newSchedule.minute = parseInt(inputTime[1]);
-  
+
   //underflow checking
   if (newSchedule.hour < 0){
     newSchedule.hour += 24;
   }
-  
+
   defaultSchedule.schedule.push(newSchedule);
-  
+
   //update the table
   showDefaultSchedule();
 
@@ -453,7 +450,7 @@ function defaultScheduleAdd(){
 
 //save default schedule to database, and push it to the control node
 function saveDefaultSchedule(){
-  $.post("update_config.php", { 
+  $.post("update_config.php", {
     "id": 1,
     "config": JSON.stringify(defaultSchedule)
   },
@@ -465,7 +462,7 @@ function saveDefaultSchedule(){
 
 // this runs when page is ready
 $(function () {
-  
+
   getSchedule();
 
 })
